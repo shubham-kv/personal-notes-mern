@@ -1,19 +1,32 @@
+import 'dotenv/config';
 import fs from 'fs/promises';
 import express from 'express';
 
+import { createServer, ViteDevServer } from 'vite';
+import compression from 'compression';
+import sirv from 'sirv';
+import morgan from 'morgan';
+
+import { logger } from './logger';
+
 const isProdEnv = process.env.NODE_ENV === 'production';
-const port = process.env.PORT || 5173;
 const base = process.env.BASE || '/';
 
-(async function main() {
+export async function createApp(): Promise<express.Express> {
   const app = express();
+  const morganStream: morgan.StreamOptions = {
+    write(str) {
+      logger.info(str.trim());
+    },
+  };
 
   // Add Vite or respective production middlewares
-  /** @type {import('vite').ViteDevServer | undefined} */
-  let vite;
+  let vite: ViteDevServer | undefined;
+
+  app.disable('x-powered-by');
+  app.use(morgan('tiny', { stream: morganStream }));
 
   if (!isProdEnv) {
-    const { createServer } = await import('vite');
     vite = await createServer({
       server: { middlewareMode: true },
       appType: 'custom',
@@ -21,8 +34,6 @@ const base = process.env.BASE || '/';
     });
     app.use(vite.middlewares);
   } else {
-    const compression = (await import('compression')).default;
-    const sirv = (await import('sirv')).default;
     app.use(compression());
     app.use(base, sirv('./dist/client', { extensions: [] }));
   }
@@ -31,21 +42,20 @@ const base = process.env.BASE || '/';
   app.use(async (req, res) => {
     try {
       const url = req.originalUrl.replace(base, '');
+      let template: string;
 
-      /** @type {string} */
-      let template;
-
-      /** @type {import('./src/entry-server.tsx').render} */
+      /** @type {import('../src/entry-server').render} */
       let render;
 
       if (!isProdEnv) {
         // Always read fresh template in development
         template = await fs.readFile('./index.html', 'utf-8');
-        template = await vite.transformIndexHtml(url, template);
-        render = (await vite.ssrLoadModule('/src/entry-server.tsx')).render;
+        template = await vite!.transformIndexHtml(url, template);
+        render = (await vite!.ssrLoadModule('/src/entry-server')).render;
       } else {
+        // Cached production assets
         template = await fs.readFile('./dist/client/index.html', 'utf-8');
-        render = (await import('./dist/server/entry-server.js')).render;
+        render = (await import('../dist/server/entry-server' as any)).render;
       }
 
       const rendered = await render(url);
@@ -55,14 +65,12 @@ const base = process.env.BASE || '/';
         .replace(`<!--app-html-->`, rendered.html ?? '');
 
       res.status(200).set({ 'Content-Type': 'text/html' }).send(html);
-    } catch (e) {
-      vite?.ssrFixStacktrace(e);
-      console.log(e.stack);
+    } catch (e: any) {
+      vite?.ssrFixStacktrace(e as Error);
+      logger.error(e.stack);
       res.status(500).end(e.stack);
     }
   });
 
-  app.listen(port, () => {
-    console.log(`Server started at http://localhost:${port}`);
-  });
-})();
+  return app;
+}
