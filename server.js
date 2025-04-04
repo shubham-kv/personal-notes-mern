@@ -35,16 +35,15 @@ const base = process.env.BASE || '/';
       /** @type {string} */
       let template;
 
-      /** @type {import('./src/entry-server.jsx').render} */
+      /** @type {import('./src/entry-server.tsx').render} */
       let render;
 
       if (!isProdEnv) {
         // Always read fresh template in development
         template = await fs.readFile('./index.html', 'utf-8');
         template = await vite.transformIndexHtml(url, template);
-        render = (await vite.ssrLoadModule('/src/entry-server.jsx')).render;
+        render = (await vite.ssrLoadModule('/src/entry-server.tsx')).render;
       } else {
-        // Cached production assets
         template = await fs.readFile('./dist/client/index.html', 'utf-8');
         render = (await import('./dist/server/entry-server.js')).render;
       }
