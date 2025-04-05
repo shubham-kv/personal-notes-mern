@@ -35,7 +35,7 @@ describe('Notes API e2e', () => {
         });
 
         test(`should return errors`, ({ expect }) => {
-          // expect(response.body).toBe(null);
+          // expect(response.body).toBe(null); // To make the test fail & display the actual from expected vs. actual
           expect(response.body.errors[0]).toBeDefined();
         });
       }
@@ -55,7 +55,7 @@ describe('Notes API e2e', () => {
       });
 
       test(`should return the created note`, ({ expect }) => {
-        // expect(response.body).toBe(null);
+        // expect(response.body).toBe(null); // To make the test fail explicitly
         expect(response.body.note).toMatchObject({
           ...data,
         });
