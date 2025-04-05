@@ -8,11 +8,14 @@ import sirv from 'sirv';
 import morgan from 'morgan';
 
 import { logger } from './logger';
+import { notesRouter } from './routes';
+import { zodErrorHandler } from './middlewares';
 
 const isProdEnv = process.env.NODE_ENV === 'production';
 const base = process.env.BASE || '/';
 
 export async function createApp(): Promise<express.Express> {
+  const apiPrefix = '/api/v1';
   const app = express();
   const morganStream: morgan.StreamOptions = {
     write(str) {
@@ -22,9 +25,8 @@ export async function createApp(): Promise<express.Express> {
 
   // Add Vite or respective production middlewares
   let vite: ViteDevServer | undefined;
-
   app.disable('x-powered-by');
-  app.use(morgan('tiny', { stream: morganStream }));
+  app.use(express.json());
 
   if (!isProdEnv) {
     vite = await createServer({
@@ -37,6 +39,9 @@ export async function createApp(): Promise<express.Express> {
     app.use(compression());
     app.use(base, sirv('./dist/client', { extensions: [] }));
   }
+
+  app.use(morgan('tiny', { stream: morganStream }));
+  app.use(`${apiPrefix}/notes`, notesRouter);
 
   // Serve HTML
   app.use(async (req, res) => {
@@ -71,6 +76,8 @@ export async function createApp(): Promise<express.Express> {
       res.status(500).end(e.stack);
     }
   });
+
+  app.use(zodErrorHandler);
 
   return app;
 }
