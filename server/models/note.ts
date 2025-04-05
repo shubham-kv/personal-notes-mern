@@ -9,4 +9,6 @@ const noteSchema = new Schema<INote>(
   { timestamps: true }
 );
 
+noteSchema.index({ title: 'text', content: 'text' });
+
 export const Note = model<INote>('Note', noteSchema);

@@ -1,4 +1,4 @@
-import { SuccessResponse } from './utils';
+import { PaginatedResponse, SuccessResponse } from './utils';
 
 export interface INote {
   id: string;
@@ -10,3 +10,11 @@ export interface INote {
 
 export type CreateNoteData = Pick<INote, 'title' | 'content'>;
 export type CreateNoteResponse = SuccessResponse<{ note: INote }>;
+
+export type GetNotesQueryParams = {
+  search?: string;
+  page: number;
+  pageLimit: number;
+};
+
+export type GetNotesResponse = SuccessResponse<PaginatedResponse<INote>>;
