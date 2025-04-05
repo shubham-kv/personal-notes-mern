@@ -3,12 +3,15 @@
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" },
-    { "path": "./tsconfig.server.json" }
+    { "path": "./tsconfig.server.json" },
+    { "path": "./tsconfig.test.json" }
   ],
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@server/*": ["./server/*"],
+      "@shared/*": ["./shared/*"],
+      "@/*": ["./src/*"],
     }
   }
 }
