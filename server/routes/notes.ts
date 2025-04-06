@@ -2,19 +2,18 @@ import { Router } from 'express';
 
 import { createNote, getNotes } from '@server/services/notes';
 import { middlewareWrapper, zodSchemaValidator } from '@server/middlewares';
+
 import { createNoteSchema, getNotesQueryParamsSchema } from '@shared/schemas';
-import { GetNotesQueryParams } from '@shared/types/api';
+import { CreateNoteData, GetNotesQueryParams } from '@shared/types/api';
 
 const notesRouter = Router();
 
 notesRouter.post(
   '/',
-  middlewareWrapper(async (req, _, next) => {
-    req.body = await createNoteSchema.parseAsync(req.body);
-    next();
-  }),
-  middlewareWrapper(async (req, res) => {
-    const createNoteResponse = await createNote(req.body);
+  zodSchemaValidator(createNoteSchema, 'body', 'parsedBody'),
+  middlewareWrapper(async (_, res) => {
+    const parsedBody = res.locals.parsedBody as CreateNoteData;
+    const createNoteResponse = await createNote(parsedBody);
     res.status(201).json(createNoteResponse);
   })
 );
