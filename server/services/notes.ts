@@ -37,7 +37,7 @@ export async function getNotes(
         ...(params.search ? { score: { $meta: 'textScore' } } : {}),
       },
     },
-    { $sort: params.search ? { score: -1 } : { createdAt: 1 } },
+    { $sort: params.search ? { score: -1 } : { createdAt: -1 } },
     {
       $facet: {
         data: [{ $skip: skip }, { $limit: pageLimit }],
