@@ -8,10 +8,10 @@ import { CreateNoteData } from '@shared/types/api';
 import { runDBHooks } from '../setup';
 import { createNoteDataStub } from '../stubs';
 import { invalidCreateNoteData } from '../data';
-import { createNoteApiPath } from '../constants';
+import { notesResourcePath } from '../constants';
 
 describe('Notes API e2e', () => {
-  const createNoteRequestLine = `POST ${createNoteApiPath}`;
+  const createNoteRequestLine = `POST ${notesResourcePath}`;
   let testAgent: TestAgent;
 
   beforeAll(async () => {
@@ -27,7 +27,7 @@ describe('Notes API e2e', () => {
         let response: Response;
 
         beforeEach(async () => {
-          response = await testAgent!.post(createNoteApiPath).send(input);
+          response = await testAgent!.post(notesResourcePath).send(input);
         });
 
         test(`should return '400 Bad Request'`, ({ expect }) => {
@@ -47,7 +47,7 @@ describe('Notes API e2e', () => {
 
       beforeEach(async () => {
         data = createNoteDataStub();
-        response = await testAgent!.post(createNoteApiPath).send(data);
+        response = await testAgent!.post(notesResourcePath).send(data);
       });
 
       test(`should return '201 Created'`, ({ expect }) => {
