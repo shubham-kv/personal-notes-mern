@@ -10,12 +10,12 @@ import morgan from 'morgan';
 import { logger } from './logger';
 import { notesRouter } from './routes';
 import { zodErrorHandler } from './middlewares';
+import { apiPrefix } from '@shared/constants';
 
 const isProdEnv = process.env.NODE_ENV === 'production';
 const base = process.env.BASE || '/';
 
 export async function createApp(): Promise<express.Express> {
-  const apiPrefix = '/api/v1';
   const app = express();
   const morganStream: morgan.StreamOptions = {
     write(str) {

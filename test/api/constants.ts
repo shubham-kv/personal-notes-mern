@@ -1,2 +1,3 @@
-const apiPrefix = '/api/v1';
+import { apiPrefix } from '@shared/constants';
+
 export const notesResourcePath = `${apiPrefix}/notes`;
