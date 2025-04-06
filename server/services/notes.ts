@@ -1,5 +1,10 @@
 import { Note } from '../models/note';
-import { CreateNoteResponse, INote } from '@shared/types/api';
+import {
+  CreateNoteResponse,
+  GetNotesQueryParams,
+  GetNotesResponse,
+  INote,
+} from '@shared/types/api';
 
 export async function createNote(
   data: Pick<INote, 'title' | 'content'>
@@ -10,5 +15,49 @@ export async function createNote(
   return {
     message: 'Success',
     note: { id, title, content, createdAt, updatedAt },
+  };
+}
+
+export async function getNotes(
+  params: GetNotesQueryParams
+): Promise<GetNotesResponse> {
+  const skip = (params.page - 1) * params.pageLimit;
+  const { pageLimit } = params;
+
+  const aggregateResult = await Note.aggregate([
+    {
+      $match: params.search ? { $text: { $search: params.search } } : {},
+    },
+    {
+      $project: {
+        title: 1,
+        content: 1,
+        createdAt: 1,
+        updatedAt: 1,
+        ...(params.search ? { score: { $meta: 'textScore' } } : {}),
+      },
+    },
+    { $sort: params.search ? { score: -1 } : { createdAt: -1 } },
+    {
+      $facet: {
+        data: [{ $skip: skip }, { $limit: pageLimit }],
+        metadata: [{ $count: 'total' }],
+      },
+    },
+  ]);
+
+  const notes: INote[] = (aggregateResult[0]?.data ?? []).map((n: any) => ({
+    id: n._id,
+    ...n,
+    _id: undefined,
+    score: undefined,
+  }));
+
+  return {
+    message: 'Success',
+    data: notes,
+    total: aggregateResult[0]?.metadata[0]?.total ?? 0,
+    page: params.page,
+    pageLimit: params.pageLimit,
   };
 }
