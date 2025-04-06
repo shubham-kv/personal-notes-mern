@@ -12,7 +12,8 @@
     "build:server": "vite build --ssr src/entry-server.jsx --outDir dist/server",
     "preview": "cross-env NODE_ENV=production node --import=tsx server/index.ts",
     "test:api": "vitest run test/api",
-    "test:api:watch": "vitest watch test/api"
+    "test:api:watch": "vitest watch test/api",
+    "test:cov": "vitest run --coverage"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.1.2",
@@ -23,6 +24,7 @@
     "cross-env": "^7.0.3",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "http-errors": "^2.0.0",
     "lucide-react": "^0.487.0",
     "mongoose": "^8.13.2",
     "morgan": "^1.10.0",

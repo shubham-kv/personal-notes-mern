@@ -1,6 +1,8 @@
+import createHttpError from 'http-errors';
 import { Note } from '../models/note';
 import {
   CreateNoteResponse,
+  GetNoteResponse,
   GetNotesQueryParams,
   GetNotesResponse,
   INote,
@@ -59,5 +61,22 @@ export async function getNotes(
     total: aggregateResult[0]?.metadata[0]?.total ?? 0,
     page: params.page,
     pageLimit: params.pageLimit,
+  };
+}
+
+export async function getNote(noteId: string): Promise<GetNoteResponse> {
+  const note = await Note.findById(noteId);
+
+  if (!note) {
+    throw createHttpError(404, {
+      extraMessage: 'Failed, Requested resource was not found.',
+    });
+  }
+
+  const { id, title, content, createdAt, updatedAt } = note;
+
+  return {
+    message: 'Success',
+    note: { id, title, content, createdAt, updatedAt },
   };
 }

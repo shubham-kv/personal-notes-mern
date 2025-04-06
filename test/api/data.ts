@@ -35,3 +35,11 @@ export const invalidGetNotesQueryParams: Partial<
   { pageLimit: 0, page: 0 },
   { pageLimit: Number.MAX_VALUE, page: Number.MAX_VALUE },
 ];
+
+export const invalidIdParams: string[] = [
+  '1',
+  'random string',
+  'aaaaaaaaaaaaaaaaaaaaaaa',
+  'gggggggggggggggggggggggg',
+  'aaaaaaaaaaaaaaaaaaaaaaaaa',
+]
