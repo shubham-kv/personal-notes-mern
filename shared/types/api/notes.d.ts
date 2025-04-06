@@ -18,3 +18,4 @@ export type GetNotesQueryParams = {
 };
 
 export type GetNotesResponse = SuccessResponse<PaginatedResponse<INote>>;
+export type GetNoteResponse = SuccessResponse<{ note: INote }>;

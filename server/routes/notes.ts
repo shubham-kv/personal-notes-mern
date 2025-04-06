@@ -1,7 +1,11 @@
 import { Router } from 'express';
 
-import { createNote, getNotes } from '@server/services/notes';
-import { middlewareWrapper, zodSchemaValidator } from '@server/middlewares';
+import { createNote, getNote, getNotes } from '@server/services/notes';
+import {
+  middlewareWrapper,
+  mongoIdParamValidator,
+  zodSchemaValidator,
+} from '@server/middlewares';
 
 import { createNoteSchema, getNotesQueryParamsSchema } from '@shared/schemas';
 import { CreateNoteData, GetNotesQueryParams } from '@shared/types/api';
@@ -24,6 +28,15 @@ notesRouter.get(
   middlewareWrapper(async (_, res) => {
     const parsedQuery = res.locals.parsedQuery as GetNotesQueryParams;
     const response = await getNotes(parsedQuery);
+    res.status(200).json(response);
+  })
+);
+
+notesRouter.get(
+  '/:id',
+  mongoIdParamValidator('id'),
+  middlewareWrapper(async (req, res) => {
+    const response = await getNote(req.params.id);
     res.status(200).json(response);
   })
 );

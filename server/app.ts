@@ -9,7 +9,7 @@ import morgan from 'morgan';
 
 import { logger } from './logger';
 import { notesRouter } from './routes';
-import { zodErrorHandler } from './middlewares';
+import { httpErrorHandler, zodErrorHandler } from './middlewares';
 import { apiPrefix } from '@shared/constants';
 
 const isProdEnv = process.env.NODE_ENV === 'production';
@@ -78,6 +78,7 @@ export async function createApp(): Promise<express.Express> {
   });
 
   app.use(zodErrorHandler);
+  app.use(httpErrorHandler);
 
   return app;
 }

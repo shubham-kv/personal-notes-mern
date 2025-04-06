@@ -3,7 +3,7 @@ type Response<T> = {
 } & T;
 
 export type SuccessResponse<T> = Response<T>;
-export type ErrorResponse<T> = {
+export type ErrorResponse<T = {}> = {
   error: string;
   message: string;
 } & T;
