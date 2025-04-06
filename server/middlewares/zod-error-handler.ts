@@ -13,9 +13,10 @@ export const zodErrorHandler: ErrorRequestHandler = (e, _, res, next) => {
       message: e.message,
     }));
 
-    const errorResponse: ErrorResponse<{ errors: typeof errors }> = {
-      message: `${statusText}`,
-      errors: errors,
+    const errorResponse: ErrorResponse<{ details: typeof errors }> = {
+      error: `${statusCode}, ${statusText}`,
+      message: 'Failed, Request received invalid inputs, check & try again.',
+      details: errors,
     };
 
     logger.trace(e);
