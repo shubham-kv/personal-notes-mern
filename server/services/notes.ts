@@ -2,6 +2,7 @@ import createHttpError from 'http-errors';
 import { Note } from '../models/note';
 import {
   CreateNoteResponse,
+  DeleteNoteResponse,
   GetNoteResponse,
   GetNotesQueryParams,
   GetNotesResponse,
@@ -100,5 +101,19 @@ export async function updateNote(
   return {
     message: 'Update Success',
     note: { id, title, content, createdAt, updatedAt },
+  };
+}
+
+export async function deleteNote(noteId: string): Promise<DeleteNoteResponse> {
+  const note = await Note.findByIdAndDelete(noteId);
+
+  if (!note) {
+    throw createHttpError(404, {
+      extraMessage: 'Failed, Requested resource was not found.',
+    });
+  }
+
+  return {
+    message: 'Delete Success',
   };
 }

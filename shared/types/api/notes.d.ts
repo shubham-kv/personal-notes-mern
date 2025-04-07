@@ -22,3 +22,5 @@ export type GetNoteResponse = SuccessResponse<{ note: INote }>;
 
 export type UpdateNoteData = Partial<CreateNoteData>;
 export type UpdateNoteResponse = GetNoteResponse;
+
+export type DeleteNoteResponse = SuccessResponse;
