@@ -6,6 +6,8 @@ import {
   GetNotesQueryParams,
   GetNotesResponse,
   INote,
+  UpdateNoteData,
+  UpdateNoteResponse,
 } from '@shared/types/api';
 
 export async function createNote(
@@ -77,6 +79,26 @@ export async function getNote(noteId: string): Promise<GetNoteResponse> {
 
   return {
     message: 'Success',
+    note: { id, title, content, createdAt, updatedAt },
+  };
+}
+
+export async function updateNote(
+  noteId: string,
+  data: UpdateNoteData
+): Promise<UpdateNoteResponse> {
+  const note = await Note.findByIdAndUpdate(noteId, data, { new: true });
+
+  if (!note) {
+    throw createHttpError(404, {
+      extraMessage: 'Failed, Requested resource was not found.',
+    });
+  }
+
+  const { id, title, content, createdAt, updatedAt } = note;
+
+  return {
+    message: 'Update Success',
     note: { id, title, content, createdAt, updatedAt },
   };
 }

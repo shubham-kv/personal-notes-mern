@@ -1,19 +1,29 @@
-import { CreateNoteData, GetNotesQueryParams } from '@shared/types/api';
+import {
+  CreateNoteData,
+  GetNotesQueryParams,
+  UpdateNoteData,
+} from '@shared/types/api';
 
 export const createNoteInputs: CreateNoteData[] = [
   {
     title: 'First note',
-    content: 'Test content of the first note'
+    content: 'Test content of the first note',
   },
   {
     title: 'Second note',
-    content: 'Here is the second note with some dummy data'
+    content: 'Here is the second note with some dummy data',
   },
   {
     title: 'The THIRD',
-    content: 'The answer is the third'
-  }
-]
+    content: 'The answer is the third',
+  },
+];
+
+export const updateNoteInputs: UpdateNoteData[] = [
+  { title: 'Updated', content: 'Updated' },
+  { content: 'Title only update' },
+  { content: 'Content only update' },
+];
 
 export const invalidCreateNoteData: Partial<CreateNoteData & { foo: any }>[] = [
   { foo: 'bar' },
@@ -42,4 +52,11 @@ export const invalidIdParams: string[] = [
   'aaaaaaaaaaaaaaaaaaaaaaa',
   'gggggggggggggggggggggggg',
   'aaaaaaaaaaaaaaaaaaaaaaaaa',
-]
+];
+
+export const invalidUpdateNoteData: Partial<UpdateNoteData & { foo: any }>[] = [
+  { foo: 'bar' },
+  { title: '' },
+  { title: '', content: 'some content' },
+  { title: 'test title', content: 'test content', foo: 'bar' },
+];
