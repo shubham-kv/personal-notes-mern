@@ -1,14 +1,29 @@
 import { Router } from 'express';
 
-import { createNote, getNote, getNotes } from '@server/services/notes';
+import {
+  createNote,
+  getNote,
+  getNotes,
+  updateNote,
+} from '@server/services/notes';
+
 import {
   middlewareWrapper,
   mongoIdParamValidator,
   zodSchemaValidator,
 } from '@server/middlewares';
 
-import { createNoteSchema, getNotesQueryParamsSchema } from '@shared/schemas';
-import { CreateNoteData, GetNotesQueryParams } from '@shared/types/api';
+import {
+  createNoteSchema,
+  getNotesQueryParamsSchema,
+  updateNoteSchema,
+} from '@shared/schemas';
+
+import {
+  CreateNoteData,
+  GetNotesQueryParams,
+  UpdateNoteData,
+} from '@shared/types/api';
 
 const notesRouter = Router();
 
@@ -37,6 +52,18 @@ notesRouter.get(
   mongoIdParamValidator('id'),
   middlewareWrapper(async (req, res) => {
     const response = await getNote(req.params.id);
+    res.status(200).json(response);
+  })
+);
+
+notesRouter.patch(
+  '/:id',
+  mongoIdParamValidator('id'),
+  zodSchemaValidator(updateNoteSchema, 'body', 'parsedBody'),
+  middlewareWrapper(async (req, res) => {
+    const noteId = req.params.id;
+    const updateData = res.locals.parsedBody as UpdateNoteData;
+    const response = await updateNote(noteId, updateData);
     res.status(200).json(response);
   })
 );

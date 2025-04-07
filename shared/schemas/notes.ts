@@ -7,14 +7,16 @@ import {
   minPerPage,
 } from '@shared/constants';
 
+const titleSchema = z.string().trim().min(1).max(512);
+const contentSchema = z
+  .string()
+  .trim()
+  .max(1024 * 1024 * 1024);
+
 export const createNoteSchema = z
   .object({
-    title: z.string().trim().min(1).max(512),
-    content: z
-      .string()
-      .trim()
-      .min(1)
-      .max(1024 * 1024),
+    title: titleSchema,
+    content: contentSchema.min(1),
   })
   .strict();
 
@@ -46,3 +48,18 @@ export const getNotesQueryParamsSchema = z
       .default(defaultPerPageLimit),
   })
   .strict();
+
+export const updateNoteSchema = z
+  .object({
+    title: titleSchema.optional(),
+    content: contentSchema.optional(),
+  })
+  .strict()
+  .superRefine((value, ctx) => {
+    if (Object.keys(value).length <= 0) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'No key(s) in object',
+      });
+    }
+  });
