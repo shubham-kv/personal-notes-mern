@@ -4,14 +4,15 @@ import TestAgent from 'supertest/lib/agent';
 
 import { createApp } from '@server/app';
 import { Note } from '@server/models';
-import { CreateNoteData, GetNotesQueryParams } from '@shared/types/api';
+import { CreateNoteData, GetNotesQueryParams, UpdateNoteData } from '@shared/types/api';
 
 import { runDBHooks } from '../setup';
-import { createNoteDataStub } from '../stubs';
+import { createNoteDataStub, updateNoteDataStub } from '../stubs';
 import {
   invalidCreateNoteData,
   invalidGetNotesQueryParams,
   invalidIdParams,
+  invalidUpdateNoteData,
 } from '../data';
 import { noteResourcePath, notesResourcePath } from '../constants';
 
@@ -19,6 +20,7 @@ describe('Notes API e2e', () => {
   const createNoteRequestLine = `POST ${notesResourcePath}`;
   const getNotesRequestLine = `GET ${notesResourcePath}`;
   const getNoteRequestLine = `GET ${noteResourcePath}`;
+  const updateNoteRequestLine = `PATCH ${noteResourcePath}`;
 
   let testAgent: TestAgent;
   const seededNoteIds: string[] = [];
@@ -197,6 +199,111 @@ describe('Notes API e2e', () => {
             id,
             title: expect.any(String),
             content: expect.any(String),
+          },
+        });
+      });
+    });
+  });
+
+  describe(`Update Note API '${updateNoteRequestLine}'`, () => {
+    describe.each(invalidIdParams)(
+      'when requested with invalid id parameter',
+      (idParam) => {
+        let response: Response;
+
+        beforeEach(async () => {
+          response = await testAgent
+            .patch(noteResourcePath.replace(':id', idParam))
+            .send(updateNoteDataStub());
+        });
+
+        test(`should fail with '400 Bad Request'`, ({ expect }) => {
+          expect(response.statusCode).toBe(400);
+        });
+
+        test(`should return error response`, ({ expect }) => {
+          expect(response.body).toMatchObject({
+            error: expect.stringMatching(/bad/gi),
+            message: expect.stringMatching(/fail/gi),
+          });
+        });
+      }
+    );
+
+    describe('when requested with valid id but non existing resource', () => {
+      let id: string;
+      let response: Response;
+
+      beforeEach(async () => {
+        id = 'ffffffffffffffffffffffff';
+        response = await testAgent
+          .patch(noteResourcePath.replace(':id', id))
+          .send(updateNoteDataStub());
+      });
+
+      test(`should fail with '404 Not Found'`, ({ expect }) => {
+        expect(response.statusCode).toBe(404);
+      });
+
+      test(`should return error response`, ({ expect }) => {
+        expect(response.body).toMatchObject({
+          error: expect.stringMatching(/not found/gi),
+          message: expect.stringMatching(/fail/gi),
+        });
+      });
+    });
+
+    describe.each(invalidUpdateNoteData)(
+      'when requested with valid id & invalid update data',
+      (invalidData) => {
+        let id: string;
+        let response: Response;
+
+        beforeEach(async () => {
+          id = seededNoteIds[0];
+          response = await testAgent
+            .patch(noteResourcePath.replace(':id', id))
+            .send(invalidData);
+        });
+
+        test(`should fail with '400 Bad Request'`, ({ expect }) => {
+          expect(response.statusCode).toBe(400);
+        });
+
+        test(`should return error response`, ({ expect }) => {
+          expect(response.body).toMatchObject({
+            error: expect.stringMatching(/bad request/gi),
+            message: expect.stringMatching(/fail/gi),
+          });
+        });
+      }
+    );
+
+    describe('when requested with valid id & valid data', () => {
+      let noteId: string;
+      let updateNoteData: UpdateNoteData;
+      let response: Response;
+
+      beforeEach(async () => {
+        noteId = seededNoteIds[0];
+        updateNoteData = updateNoteDataStub();
+
+        response = await testAgent
+          .patch(noteResourcePath.replace(':id', noteId))
+          .send(updateNoteData);
+      });
+
+      test(`should respond with '200 OK'`, ({ expect }) => {
+        expect(response.statusCode).toBe(200);
+      });
+
+      test(`should return success response`, ({ expect }) => {
+        expect(response.body).toMatchObject({
+          message: expect.stringMatching(/success/gi),
+          note: {
+            id: noteId,
+            title: updateNoteData.title,
+            content: updateNoteData.content,
           },
         });
       });
