@@ -2,6 +2,7 @@ import { Router } from 'express';
 
 import {
   createNote,
+  deleteNote,
   getNote,
   getNotes,
   updateNote,
@@ -64,6 +65,16 @@ notesRouter.patch(
     const noteId = req.params.id;
     const updateData = res.locals.parsedBody as UpdateNoteData;
     const response = await updateNote(noteId, updateData);
+    res.status(200).json(response);
+  })
+);
+
+notesRouter.delete(
+  '/:id',
+  mongoIdParamValidator('id'),
+  middlewareWrapper(async (req, res) => {
+    const noteId = req.params.id;
+    const response = await deleteNote(noteId);
     res.status(200).json(response);
   })
 );
