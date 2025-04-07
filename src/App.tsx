@@ -1,9 +1,10 @@
 import { Route, Routes } from 'react-router';
+import { AppLayout } from '@/components/layouts';
 
 export function Home() {
   return (
     <div>
-      <h2 className="font-bold text-2xl">Home</h2>
+      <p>List of Notes</p>
     </div>
   );
 }
@@ -11,7 +12,9 @@ export function Home() {
 export default function App() {
   return (
     <Routes>
-      <Route index element={<Home />} />
+      <Route path="/" element={<AppLayout />}>
+        <Route index element={<Home />} />
+      </Route>
     </Routes>
   );
 }
