@@ -4,7 +4,11 @@ import TestAgent from 'supertest/lib/agent';
 
 import { createApp } from '@server/app';
 import { Note } from '@server/models';
-import { CreateNoteData, GetNotesQueryParams, UpdateNoteData } from '@shared/types/api';
+import {
+  CreateNoteData,
+  GetNotesQueryParams,
+  UpdateNoteData,
+} from '@shared/types/api';
 
 import { runDBHooks } from '../setup';
 import { createNoteDataStub, updateNoteDataStub } from '../stubs';
@@ -21,6 +25,7 @@ describe('Notes API e2e', () => {
   const getNotesRequestLine = `GET ${notesResourcePath}`;
   const getNoteRequestLine = `GET ${noteResourcePath}`;
   const updateNoteRequestLine = `PATCH ${noteResourcePath}`;
+  const deleteNoteRequestLine = `DELETE ${noteResourcePath}`;
 
   let testAgent: TestAgent;
   const seededNoteIds: string[] = [];
@@ -305,6 +310,77 @@ describe('Notes API e2e', () => {
             title: updateNoteData.title,
             content: updateNoteData.content,
           },
+        });
+      });
+    });
+  });
+
+  describe(`Delete Note API '${deleteNoteRequestLine}'`, () => {
+    describe.each(invalidIdParams)(
+      'when requested with invalid id parameter',
+      (idParam) => {
+        let response: Response;
+
+        beforeEach(async () => {
+          response = await testAgent.delete(
+            noteResourcePath.replace(':id', idParam)
+          );
+        });
+
+        test(`should fail with '400 Bad Request'`, ({ expect }) => {
+          expect(response.statusCode).toBe(400);
+        });
+
+        test(`should return error response`, ({ expect }) => {
+          expect(response.body).toMatchObject({
+            error: expect.stringMatching(/bad/gi),
+            message: expect.stringMatching(/fail/gi),
+          });
+        });
+      }
+    );
+
+    describe('when requested with valid id but non existing resource', () => {
+      let noteId: string;
+      let response: Response;
+
+      beforeEach(async () => {
+        noteId = 'ffffffffffffffffffffffff';
+        response = await testAgent.delete(
+          noteResourcePath.replace(':id', noteId)
+        );
+      });
+
+      test(`should fail with '404 Not Found'`, ({ expect }) => {
+        expect(response.statusCode).toBe(404);
+      });
+
+      test(`should return error response`, ({ expect }) => {
+        expect(response.body).toMatchObject({
+          error: expect.stringMatching(/not found/gi),
+          message: expect.stringMatching(/fail/gi),
+        });
+      });
+    });
+
+    describe('when requested with valid id', () => {
+      let noteId: string;
+      let response: Response;
+
+      beforeAll(async () => {
+        noteId = seededNoteIds[0];
+        response = await testAgent.delete(
+          noteResourcePath.replace(':id', noteId)
+        );
+      });
+
+      test(`should respond with '200 OK'`, ({ expect }) => {
+        expect(response.statusCode).toBe(200);
+      });
+
+      test(`should return success response`, ({ expect }) => {
+        expect(response.body).toMatchObject({
+          message: expect.stringMatching(/success/gi),
         });
       });
     });
