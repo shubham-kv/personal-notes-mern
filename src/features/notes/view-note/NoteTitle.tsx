@@ -1,3 +1,4 @@
+import DOMPurify from 'dompurify';
 import { Extensions } from '@tiptap/react';
 
 import Document from '@tiptap/extension-document';
@@ -23,15 +24,25 @@ const editorProps: EditorProps<any> = {
   attributes: { class: `editor note-title focus-visible:outline-none` },
 };
 
-export function NoteTitle(
-  props: Pick<TiptapEditorProps, 'content' | 'onContentChange'>
-) {
+type NoteEditorProps = {
+  onContentChange?: (content: string) => void;
+} & Pick<TiptapEditorProps, 'content'>;
+
+export function NoteTitle(props: NoteEditorProps) {
+  const { content, onContentChange } = props;
+
   return (
     <TiptapEditor
       editorProps={editorProps}
       extensions={extensions}
-      {...props}
-      editable={false}
+      editable={true}
+      content={content}
+      onUpdate={({ editor }) => {
+        if (onContentChange) {
+          const sanitizedHtml = DOMPurify.sanitize(editor.getText());
+          onContentChange(sanitizedHtml);
+        }
+      }}
     />
   );
 }

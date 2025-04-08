@@ -1,3 +1,4 @@
+import DOMPurify from 'dompurify';
 import StarterKit from '@tiptap/starter-kit';
 import { Extensions } from '@tiptap/react';
 import { EditorProps } from '@tiptap/pm/view';
@@ -14,15 +15,25 @@ const editorProps: EditorProps<any> = {
   },
 };
 
-export function NoteContent(
-  props: Pick<TiptapEditorProps, 'content' | 'onContentChange'>
-) {
+type NoteEditorProps = {
+  onContentChange?: (content: string) => void;
+} & Pick<TiptapEditorProps, 'content'>;
+
+export function NoteContent(props: NoteEditorProps) {
+  const { content, onContentChange } = props;
+
   return (
     <TiptapEditor
       editorProps={editorProps}
       extensions={extensions}
-      {...props}
-      editable={false}
+      editable={true}
+      content={content}
+      onUpdate={({ editor }) => {
+        if (onContentChange) {
+          const sanitizedHtml = DOMPurify.sanitize(editor.getHTML());
+          onContentChange(sanitizedHtml);
+        }
+      }}
     />
   );
 }
