@@ -1,29 +1,46 @@
-import React, { createContext, PropsWithChildren, useContext } from 'react';
+import React, {
+  ComponentProps,
+  createContext,
+  PropsWithChildren,
+  useCallback,
+  useContext,
+  useRef,
+} from 'react';
 
 import {
   Pagination,
   PaginationContent,
   PaginationItem,
-  PaginationLink,
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
+
 import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
+
+import { Search } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 type ListCtxData<T extends { key: string }> = {
   data: T[];
   isLoading: boolean;
   error: any;
-  page: number;
-  pageLimit: number;
-  totalPages: number;
   renderListItem: (data: T) => React.ReactNode;
-  onPageChange: (newPage: number) => void;
-  onPageLimitChange: (newPageLimit: number) => void;
 };
 
 type ListProviderProps<T extends { key: string }> = ListCtxData<T> &
   PropsWithChildren;
+
+type ListSearchProps = {
+  onSearchChange: (search: string | undefined) => void;
+} & ComponentProps<'div'> &
+  Pick<ComponentProps<'input'>, 'placeholder'>;
+
+type ListPaginationProps = {
+  page: number;
+  totalPages: number;
+  onPageChange: (newPage: number) => void;
+} & ComponentProps<'div'>;
 
 const ListContext = createContext(null);
 
@@ -50,11 +67,11 @@ export function ListProvider<T extends { key: string }>(
 
 function ListSkeleton() {
   return (
-    <div className="flex flex-col gap-2 min-w-full">
+    <div className='flex flex-col gap-1 min-w-full'>
       {Array(10)
         .fill(0)
         .map((_, i) => (
-          <Skeleton key={i} className="h-11 min-w-full transition-all" />
+          <Skeleton key={i} className='h-11 min-w-full transition-all' />
         ))}
     </div>
   );
@@ -62,11 +79,11 @@ function ListSkeleton() {
 
 function ListError() {
   return (
-    <div className="min-w-full mx-auto bg-red-50 rounded py-2">
-      <h4 className="my-2 text-2xl font-light text-center text-red-500">
+    <div className='min-w-full mx-auto bg-red-50 rounded py-2 '>
+      <h4 className='my-2 text-2xl font-light text-red-500 text-center'>
         {'Oops! :('}
       </h4>
-      <p className="text-lg text-center text-red-600">
+      <p className='text-lg font-light text-red-600 text-center'>
         Something went wrong, try again later.
       </p>
     </div>
@@ -77,7 +94,7 @@ function ListView<T extends { key: string }>() {
   const { data, renderListItem } = useList<T>();
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className='flex flex-col gap-1'>
       {data.map((d) => (
         <div key={`li-${d.key}`}>{renderListItem(d)}</div>
       ))}
@@ -103,25 +120,45 @@ function ListViewWrapper() {
   return null;
 }
 
-function ListPaginationSkeleton() {
+function ListSearch(props: ListSearchProps) {
+  const { onSearchChange, className, placeholder } = props;
+  const { error } = useList();
+  const timer = useRef<NodeJS.Timeout | undefined>(undefined);
+
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const search = e.currentTarget.value.trim();
+
+    if (timer.current) {
+      clearTimeout(timer.current);
+    }
+    timer.current = setTimeout(() => {
+      onSearchChange(search ? search : undefined);
+    }, 500);
+  }, []);
+
+  if (error) {
+    return null;
+  }
+
   return (
-    <div className="flex flex-col gap-1 min-w-full">
-      <div className="justify-end flex gap-1">
-        {Array(7)
-          .fill(0)
-          .map((_, i) => (
-            <Skeleton key={i} className="w-9 h-9 transition-all" />
-          ))}
-      </div>
+    <div className={cn('flex items-center relative', className)}>
+      <Input
+        type='text'
+        placeholder={placeholder}
+        className='px-8 py-5 focus-visible:ring-0'
+        onChange={handleChange}
+      />
+      <Search className='absolute left-2.5' size='16' />
     </div>
   );
 }
 
-export function ListPagination() {
-  const { isLoading, error, page, totalPages, onPageChange } = useList();
+function ListPagination(props: ListPaginationProps) {
+  const { page, totalPages, onPageChange, className } = props;
+  const { isLoading, error } = useList();
 
   if (isLoading) {
-    return <ListPaginationSkeleton />;
+    return null;
   }
 
   if (error || totalPages <= 1) {
@@ -129,58 +166,50 @@ export function ListPagination() {
   }
 
   return (
-    <Pagination className="justify-end">
-      <PaginationContent>
-        <PaginationItem>
-          <PaginationPrevious
-            className="[&>span]:hidden"
-            href="#"
-            aria-disabled={page === 1}
-            onClick={(e) => {
-              e.preventDefault();
+    <div className={cn('flex items-center gap-2', className)}>
+      <div>
+        <span className='text-sm font-light'>
+          Page {page} of {totalPages}
+        </span>
+      </div>
 
-              if (page > 1) {
-                onPageChange(page - 1);
-              }
-            }}
-          />
-        </PaginationItem>
+      <Pagination className='w-min mx-0'>
+        <PaginationContent className='inline-flex'>
+          <PaginationItem>
+            <PaginationPrevious
+              href='#'
+              size='sm'
+              className='[&>span]:hidden'
+              aria-disabled={page === 1}
+              onClick={(e) => {
+                e.preventDefault();
+                if (page > 1) {
+                  onPageChange(page - 1);
+                }
+              }}
+            />
+          </PaginationItem>
 
-        {Array(totalPages < 9 ? totalPages : 9)
-          .fill(0)
-          .map((_, i) => (
-            <PaginationItem key={i}>
-              <PaginationLink
-                href="#"
-                isActive={page === i + 1}
-                onClick={(e) => {
-                  e.preventDefault();
-                  onPageChange(i + 1);
-                }}
-              >
-                {i + 1}
-              </PaginationLink>
-            </PaginationItem>
-          ))}
-
-        <PaginationItem>
-          <PaginationNext
-            className="[&>span]:hidden"
-            href="#"
-            aria-disabled={page === totalPages}
-            onClick={(e) => {
-              e.preventDefault();
-
-              if (page < totalPages) {
-                onPageChange(page + 1);
-              }
-            }}
-          />
-        </PaginationItem>
-      </PaginationContent>
-    </Pagination>
+          <PaginationItem>
+            <PaginationNext
+              href='#'
+              size='sm'
+              className='[&>span]:hidden'
+              aria-disabled={page === totalPages}
+              onClick={(e) => {
+                e.preventDefault();
+                if (page < totalPages) {
+                  onPageChange(page + 1);
+                }
+              }}
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
+    </div>
   );
 }
 
+ListProvider.Search = ListSearch;
 ListProvider.ListView = ListViewWrapper;
 ListProvider.Pagination = ListPagination;
