@@ -1,16 +1,26 @@
 import useSWR from 'swr';
-import { useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
+import { useSessionStorage } from '@uidotdev/usehooks';
 
 import { ListProvider } from '@/components/ui-app/ListView';
 import { ViewNoteListItem } from './ViewNoteListItem';
 import { getNotes } from './fetcher';
 import { GetNotesQueryParams } from '@shared/types/api';
 
+const defaultQueryParams: GetNotesQueryParams = { page: 1, pageLimit: 10 };
+
 export function ViewNotes() {
-  const [queryParams, setQueryParams] = useState<GetNotesQueryParams>({
-    page: 1,
-    pageLimit: 10,
-  });
+  let queryParams: GetNotesQueryParams;
+  let setQueryParams: Dispatch<SetStateAction<GetNotesQueryParams>>;
+
+  if (import.meta.env.SSR) {
+    [queryParams, setQueryParams] = useState(defaultQueryParams);
+  } else {
+    [queryParams, setQueryParams] = useSessionStorage<GetNotesQueryParams>(
+      'query-params',
+      defaultQueryParams
+    );
+  }
 
   const { data, isLoading, error } = useSWR(
     ['/api/v1/notes', queryParams],
