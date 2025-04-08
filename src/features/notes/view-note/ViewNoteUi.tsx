@@ -2,6 +2,7 @@ import { formatDistanceToNowStrict } from 'date-fns';
 
 import { NoteContent } from './NoteContent';
 import { NoteTitle } from './NoteTitle';
+import { DeleteNoteButton } from './DeleteNoteButton';
 import { INote } from '@shared/types/api';
 
 const getFormattedDate = (value: string | Date) =>
@@ -24,6 +25,10 @@ export function ViewNoteUi(props: ViewNoteUiProps) {
           <div className='text-sm font-light mt-1'>
             <span>Last Edited {getFormattedDate(note.updatedAt)}</span>
           </div>
+        </div>
+
+        <div>
+          <DeleteNoteButton />
         </div>
       </div>
 
