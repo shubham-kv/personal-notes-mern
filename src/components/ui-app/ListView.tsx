@@ -63,6 +63,11 @@ export function ListProvider<T extends { key: string }>(
   props: ListProviderProps<T>
 ) {
   const { children, ...restProps } = props;
+
+  if (props.error) {
+    return <ListError />;
+  }
+
   return (
     <ListContext.Provider value={restProps as any}>
       {children}
@@ -176,13 +181,13 @@ function ListAddButton(props: ListAddButtonProps) {
 
 function ListPagination(props: ListPaginationProps) {
   const { page, totalPages, onPageChange, className } = props;
-  const { isLoading, error } = useList();
+  const { isLoading } = useList();
 
   if (isLoading) {
     return null;
   }
 
-  if (error || totalPages <= 1) {
+  if (totalPages <= 1) {
     return null;
   }
 
