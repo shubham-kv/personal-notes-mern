@@ -179,3 +179,36 @@ body {
   font-weight: 700;
   font-style: normal;
 }
+
+.editor h1 {
+  @apply text-3xl font-extrabold my-5;
+}
+
+.editor h2 {
+  @apply text-2xl font-extrabold my-4;
+}
+
+.editor h3 {
+  @apply text-xl font-bold my-3;
+}
+
+.editor p {
+  @apply text-lg my-1;
+}
+
+.editor ul, ol {
+  @apply pl-6;
+}
+
+.editor ul li {
+  @apply list-disc;
+}
+
+.editor ol li {
+  @apply list-decimal;
+}
+
+.editor.note-title h1 {
+  @apply my-0;
+}
+

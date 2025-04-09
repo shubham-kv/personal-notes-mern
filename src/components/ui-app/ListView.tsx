@@ -17,8 +17,9 @@ import {
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
-import { Search } from 'lucide-react';
+import { LoaderCircle, Plus, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type ListCtxData<T extends { key: string }> = {
@@ -35,6 +36,10 @@ type ListSearchProps = {
   onSearchChange: (search: string | undefined) => void;
 } & ComponentProps<'div'> &
   Pick<ComponentProps<'input'>, 'placeholder'>;
+
+type ListAddButtonProps = {
+  isLoading: boolean;
+} & ComponentProps<'button'>;
 
 type ListPaginationProps = {
   page: number;
@@ -58,6 +63,11 @@ export function ListProvider<T extends { key: string }>(
   props: ListProviderProps<T>
 ) {
   const { children, ...restProps } = props;
+
+  if (props.error) {
+    return <ListError />;
+  }
+
   return (
     <ListContext.Provider value={restProps as any}>
       {children}
@@ -145,7 +155,7 @@ function ListSearch(props: ListSearchProps) {
       <Input
         type='text'
         placeholder={placeholder}
-        className='px-8 py-5 focus-visible:ring-0'
+        className='px-8 py-4 focus-visible:ring-0'
         onChange={handleChange}
       />
       <Search className='absolute left-2.5' size='16' />
@@ -153,15 +163,31 @@ function ListSearch(props: ListSearchProps) {
   );
 }
 
+function ListAddButton(props: ListAddButtonProps) {
+  const { isLoading, ...restProps } = props;
+
+  return (
+    <Button
+      variant='outline'
+      className='enabled:hover:cursor-pointer'
+      disabled={isLoading}
+      {...restProps}
+    >
+      {isLoading ? <LoaderCircle className='animate-spin' /> : <Plus />}
+      <span>Add</span>
+    </Button>
+  );
+}
+
 function ListPagination(props: ListPaginationProps) {
   const { page, totalPages, onPageChange, className } = props;
-  const { isLoading, error } = useList();
+  const { isLoading } = useList();
 
   if (isLoading) {
     return null;
   }
 
-  if (error || totalPages <= 1) {
+  if (totalPages <= 1) {
     return null;
   }
 
@@ -211,5 +237,6 @@ function ListPagination(props: ListPaginationProps) {
 }
 
 ListProvider.Search = ListSearch;
+ListProvider.AddButton = ListAddButton;
 ListProvider.ListView = ListViewWrapper;
 ListProvider.Pagination = ListPagination;
