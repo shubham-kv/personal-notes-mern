@@ -1,6 +1,7 @@
+import { AxiosError } from 'axios';
 import useSWR from 'swr';
 import { useCallback, useRef } from 'react';
-import { useParams } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 
 import { ErrorUi } from '@/components/ErrorUi';
 import { ViewNoteUiSkeleton } from './ViewNoteUiSkeleton';
@@ -10,6 +11,8 @@ import { getNote, updateNote } from './fetcher';
 
 export function ViewNoteMgr() {
   const params = useParams();
+  const navigate = useNavigate();
+
   const { data, isLoading, error, mutate } = useSWR(
     `/api/v1/notes/${params.id}`,
     getNote
@@ -69,6 +72,13 @@ export function ViewNoteMgr() {
   );
 
   if (error) {
+    if (error instanceof AxiosError) {
+      if (error.response?.status === 404) {
+        navigate('/404')
+        return null
+      }
+    }
+
     return <ErrorUi />;
   }
 
