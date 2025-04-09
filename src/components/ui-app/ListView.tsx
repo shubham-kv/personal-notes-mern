@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useContext,
   useRef,
+  useState,
 } from 'react';
 
 import {
@@ -33,6 +34,7 @@ type ListProviderProps<T extends { key: string }> = ListCtxData<T> &
   PropsWithChildren;
 
 type ListSearchProps = {
+  search: string;
   onSearchChange: (search: string | undefined) => void;
 } & ComponentProps<'div'> &
   Pick<ComponentProps<'input'>, 'placeholder'>;
@@ -131,9 +133,11 @@ function ListViewWrapper() {
 }
 
 function ListSearch(props: ListSearchProps) {
-  const { onSearchChange, className, placeholder } = props;
+  const { search, onSearchChange, className, placeholder } = props;
   const { error } = useList();
   const timer = useRef<NodeJS.Timeout | undefined>(undefined);
+
+  const [searchValue, setSearchValue] = useState(search);
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const search = e.currentTarget.value.trim();
@@ -144,6 +148,7 @@ function ListSearch(props: ListSearchProps) {
     timer.current = setTimeout(() => {
       onSearchChange(search ? search : undefined);
     }, 500);
+    setSearchValue(search);
   }, []);
 
   if (error) {
@@ -156,6 +161,7 @@ function ListSearch(props: ListSearchProps) {
         type='text'
         placeholder={placeholder}
         className='px-8 py-4 focus-visible:ring-0'
+        value={searchValue}
         onChange={handleChange}
       />
       <Search className='absolute left-2.5' size='16' />

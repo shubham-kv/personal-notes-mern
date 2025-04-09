@@ -61,6 +61,7 @@ export function ViewNotes() {
           <ListProvider.Search
             className='w-full sm:max-w-sm'
             placeholder='Search your notes'
+            search={queryParams.search ?? ''}
             onSearchChange={(search) =>
               setQueryParams((p) => ({ ...p, search, page: 1 }))
             }
