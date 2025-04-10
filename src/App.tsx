@@ -1,6 +1,6 @@
 import { Route, Routes, Navigate } from 'react-router';
 
-import { AppLayout } from '@/components/layouts';
+import { PrivateLayout, PublicLayout } from '@/components/layouts';
 import { NotFound } from '@/components/NotFound';
 import { Home } from '@/components/Home';
 
@@ -12,12 +12,12 @@ export default function App() {
       <Route path='/'>
         <Route index element={<Home />} />
 
-        <Route path='n' element={<AppLayout renderNav={true} />}>
+        <Route path='n' element={<PrivateLayout />}>
           <Route index element={<ViewNotes />} />
           <Route path=':id' element={<ViewNote />} />
         </Route>
 
-        <Route element={<AppLayout />}>
+        <Route element={<PublicLayout />}>
           <Route path='404' element={<NotFound />} />
         </Route>
       </Route>
