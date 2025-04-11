@@ -1,10 +1,11 @@
 import { Outlet } from 'react-router';
-import { ResponsiveWrapper } from '../ResponsiveWrapper';
 
 export function PublicLayout() {
   return (
-    <ResponsiveWrapper>
-      <Outlet />
-    </ResponsiveWrapper>
+    <div className='max-w-4xl mx-auto px-6'>
+      <div className='my-8'>
+        <Outlet />
+      </div>
+    </div>
   );
 }
