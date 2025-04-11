@@ -4,9 +4,9 @@ export function PrivateLayout() {
   return (
     <div className='max-w-4xl mx-auto px-6'>
       <header className='flex items-center justify-between my-4'>
-        <Link to='/n'>
-          <h1 className='text-3xl font-bold lobster-two'>personal notes</h1>
-        </Link>
+        <h1 className='text-3xl font-bold lobster-two'>
+          <Link to='/n'>personal notes</Link>
+        </h1>
       </header>
       <div className='my-8'>
         <Outlet />
