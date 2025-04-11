@@ -46,8 +46,9 @@ export function ViewNotes() {
     );
   }, []);
 
-  const notesWithKey = data?.data.map((n) => ({ key: n.id, ...n })) ?? [];
-  const totalPages = data ? Math.ceil(data.total / queryParams.pageLimit) : 0;
+  const notesWithKey = (data?.data ?? []).map((n) => ({ key: n.id, ...n }));
+  const totalPages =
+    data && data.total ? Math.ceil(data.total / queryParams.pageLimit) : 0;
 
   return (
     <ListProvider
