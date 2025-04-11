@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { requireAuth } from '@clerk/express';
 
 import {
   createNote,
@@ -27,6 +28,9 @@ import {
 } from '@shared/types/api';
 
 const notesRouter = Router();
+const signInUrl = process.env.CLERK_SIGN_IN_URL;
+
+notesRouter.use(requireAuth({ signInUrl }));
 
 notesRouter.post(
   '/',

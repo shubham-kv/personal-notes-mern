@@ -6,6 +6,7 @@ import { createServer, ViteDevServer } from 'vite';
 import compression from 'compression';
 import sirv from 'sirv';
 import morgan from 'morgan';
+import { clerkMiddleware, requireAuth } from '@clerk/express'
 
 import { logger } from './logger';
 import { notesRouter } from './routes';
@@ -14,6 +15,7 @@ import { apiPrefix } from '@shared/constants';
 
 const isProdEnv = process.env.NODE_ENV === 'production';
 const base = process.env.BASE || '/';
+const signInUrl = process.env.CLERK_SIGN_IN_URL;
 
 export async function createApp(): Promise<express.Express> {
   const app = express();
@@ -26,6 +28,7 @@ export async function createApp(): Promise<express.Express> {
   // Add Vite or respective production middlewares
   let vite: ViteDevServer | undefined;
   app.disable('x-powered-by');
+  app.use(clerkMiddleware());
   app.use(express.json());
 
   if (!isProdEnv) {
@@ -42,6 +45,10 @@ export async function createApp(): Promise<express.Express> {
 
   app.use(morgan('tiny', { stream: morganStream }));
   app.use(`${apiPrefix}/notes`, notesRouter);
+
+  // Server side auth middlewares for client pages
+  app.get('/', requireAuth({ signInUrl }), (_, res) => res.redirect('/n'));
+  app.use('/n', requireAuth({ signInUrl }));
 
   // Serve HTML
   app.use(async (req, res) => {
