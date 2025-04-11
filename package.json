@@ -16,6 +16,8 @@
     "test:cov": "vitest run --coverage"
   },
   "dependencies": {
+    "@clerk/clerk-react": "^5.26.1",
+    "@clerk/express": "^1.4.2",
     "@radix-ui/react-slot": "^1.1.2",
     "@tailwindcss/vite": "^4.1.2",
     "@tiptap/pm": "^2.11.7",

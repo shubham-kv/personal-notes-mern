@@ -2,7 +2,7 @@ import { Route, Routes, Navigate } from 'react-router';
 
 import { PrivateLayout, PublicLayout } from '@/components/layouts';
 import { NotFound } from '@/components/NotFound';
-// import { Home } from '@/components/Home';
+import { SignIn } from '@/components/SignIn';
 
 import { ViewNote, ViewNotes } from '@/features/notes';
 
@@ -18,6 +18,7 @@ export default function App() {
         </Route>
 
         <Route element={<PublicLayout />}>
+          <Route path='sign-in' element={<SignIn />} />
           <Route path='404' element={<NotFound />} />
         </Route>
       </Route>
