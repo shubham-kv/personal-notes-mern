@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 import createHttpError from 'http-errors';
-import { middlewareWrapper } from './middleware-wrapper';
+import { middlewareWrapper } from '../middleware-wrapper';
 
 export const mongoIdParamValidator = (idParamsKey: string) =>
   middlewareWrapper(async (req, _, next) => {
