@@ -47,7 +47,7 @@ export async function createApp(): Promise<express.Express> {
   app.use(`${apiPrefix}/notes`, notesRouter);
 
   // Server side auth middlewares for client pages
-  app.get('/', requireAuth({ signInUrl }), (_, res) => res.redirect('/n'));
+  app.get('/', (_, res) => res.redirect('/n'));
   app.use('/n', requireAuth({ signInUrl }));
 
   // Serve HTML
