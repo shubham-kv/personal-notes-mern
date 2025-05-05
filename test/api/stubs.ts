@@ -1,6 +1,8 @@
 import assert from 'assert';
-import { CreateNoteData, UpdateNoteData } from '@shared/types/api';
 import { createNoteInputs, updateNoteInputs } from './data';
+
+import { CreateNoteData, UpdateNoteData } from '@shared/types/api';
+import { IUser } from '@shared/types/api/user';
 
 export const createNoteDataStub = (index = 0): CreateNoteData => {
   assert(index >= 0 && index < createNoteInputs.length);
@@ -15,3 +17,8 @@ export const updateNoteDataStub = (index = 0): UpdateNoteData => {
     ...updateNoteInputs[index],
   };
 };
+
+export const testUserStub = (): Pick<IUser, 'name' | 'email'> => ({
+  name: 'John Doe',
+  email: 'john.doe@example.com',
+});

@@ -1,5 +1,5 @@
 import { ZodSchema } from 'zod';
-import { middlewareWrapper } from './middleware-wrapper';
+import { middlewareWrapper } from '../middleware-wrapper';
 
 export const zodSchemaValidator = (
   schema: ZodSchema,

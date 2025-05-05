@@ -24,6 +24,7 @@ import { LoaderCircle, Plus, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type ListCtxData<T extends { key: string }> = {
+  emptyDataMessage?: string
   data: T[];
   isLoading: boolean;
   error: any;
@@ -114,6 +115,18 @@ function ListView<T extends { key: string }>() {
   );
 }
 
+function EmptyDataListView() {
+  const {emptyDataMessage} = useList()
+
+  return (
+    <div className='rounded-sm bg-gray-50 p-4'>
+      <h3 className='text-center text-gray-400 text-2xl font-medium'>
+        {emptyDataMessage ?? 'No data found!'}
+      </h3>
+    </div>
+  );
+}
+
 function ListViewWrapper() {
   const { data, error, isLoading } = useList();
 
@@ -126,6 +139,10 @@ function ListViewWrapper() {
   }
 
   if (data) {
+    if (data.length === 0) {
+      return <EmptyDataListView />
+    }
+
     return <ListView />;
   }
 
