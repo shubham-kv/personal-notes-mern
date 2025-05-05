@@ -1,9 +1,12 @@
+import { IUser } from './user';
 import { PaginatedResponse, SuccessResponse } from './utils';
 
 export interface INote {
   id: string;
   title: string;
   content: string;
+  user?: IUser | string | undefined;
+
   createdAt: Date | string;
   updatedAt: Date | string;
 }

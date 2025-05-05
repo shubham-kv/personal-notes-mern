@@ -1,5 +1,8 @@
 import createHttpError from 'http-errors';
+import { Types } from 'mongoose';
+
 import { Note } from '../models/note';
+
 import {
   CreateNoteResponse,
   DeleteNoteResponse,
@@ -12,9 +15,10 @@ import {
 } from '@shared/types/api';
 
 export async function createNote(
+  userId: string,
   data: Pick<INote, 'title' | 'content'>
 ): Promise<CreateNoteResponse> {
-  const note = new Note(data);
+  const note = new Note({ ...data, user: userId });
   const { id, title, content, createdAt, updatedAt } = await note.save();
 
   return {
@@ -24,6 +28,7 @@ export async function createNote(
 }
 
 export async function getNotes(
+  userId: string,
   params: GetNotesQueryParams
 ): Promise<GetNotesResponse> {
   const skip = (params.page - 1) * params.pageLimit;
@@ -31,7 +36,14 @@ export async function getNotes(
 
   const aggregateResult = await Note.aggregate([
     {
-      $match: params.search ? { $text: { $search: params.search } } : {},
+      $match: params.search
+        ? {
+            $and: [
+              { user: new Types.ObjectId(userId) },
+              { $text: { $search: params.search } },
+            ],
+          }
+        : { user: new Types.ObjectId(userId) },
     },
     {
       $project: {
@@ -67,8 +79,11 @@ export async function getNotes(
   };
 }
 
-export async function getNote(noteId: string): Promise<GetNoteResponse> {
-  const note = await Note.findById(noteId);
+export async function getNote(
+  userId: string,
+  noteId: string
+): Promise<GetNoteResponse> {
+  const note = await Note.findOne({ _id: noteId, user: userId });
 
   if (!note) {
     throw createHttpError(404, {
@@ -85,10 +100,15 @@ export async function getNote(noteId: string): Promise<GetNoteResponse> {
 }
 
 export async function updateNote(
+  userId: string,
   noteId: string,
   data: UpdateNoteData
 ): Promise<UpdateNoteResponse> {
-  const note = await Note.findByIdAndUpdate(noteId, data, { new: true });
+  const note = await Note.findOneAndUpdate(
+    { _id: noteId, user: userId },
+    data,
+    { new: true }
+  );
 
   if (!note) {
     throw createHttpError(404, {
@@ -104,8 +124,11 @@ export async function updateNote(
   };
 }
 
-export async function deleteNote(noteId: string): Promise<DeleteNoteResponse> {
-  const note = await Note.findByIdAndDelete(noteId);
+export async function deleteNote(
+  userId: string,
+  noteId: string
+): Promise<DeleteNoteResponse> {
+  const note = await Note.findOneAndDelete({ _id: noteId, user: userId });
 
   if (!note) {
     throw createHttpError(404, {

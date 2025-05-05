@@ -37,9 +37,9 @@ notesRouter.use(requireAuth({ signInUrl }), authenticate(clerkAuthStrategy));
 notesRouter.post(
   '/',
   zodSchemaValidator(createNoteSchema, 'body', 'parsedBody'),
-  middlewareWrapper(async (_, res) => {
+  middlewareWrapper(async (req, res) => {
     const parsedBody = res.locals.parsedBody as CreateNoteData;
-    const createNoteResponse = await createNote(parsedBody);
+    const createNoteResponse = await createNote(req.user!.id, parsedBody);
     res.status(201).json(createNoteResponse);
   })
 );
@@ -47,9 +47,9 @@ notesRouter.post(
 notesRouter.get(
   '/',
   zodSchemaValidator(getNotesQueryParamsSchema, 'query', 'parsedQuery'),
-  middlewareWrapper(async (_, res) => {
+  middlewareWrapper(async (req, res) => {
     const parsedQuery = res.locals.parsedQuery as GetNotesQueryParams;
-    const response = await getNotes(parsedQuery);
+    const response = await getNotes(req.user!.id, parsedQuery);
     res.status(200).json(response);
   })
 );
@@ -58,7 +58,7 @@ notesRouter.get(
   '/:id',
   mongoIdParamValidator('id'),
   middlewareWrapper(async (req, res) => {
-    const response = await getNote(req.params.id);
+    const response = await getNote(req.user!.id, req.params.id);
     res.status(200).json(response);
   })
 );
@@ -70,7 +70,7 @@ notesRouter.patch(
   middlewareWrapper(async (req, res) => {
     const noteId = req.params.id;
     const updateData = res.locals.parsedBody as UpdateNoteData;
-    const response = await updateNote(noteId, updateData);
+    const response = await updateNote(req.user!.id, noteId, updateData);
     res.status(200).json(response);
   })
 );
@@ -80,7 +80,7 @@ notesRouter.delete(
   mongoIdParamValidator('id'),
   middlewareWrapper(async (req, res) => {
     const noteId = req.params.id;
-    const response = await deleteNote(noteId);
+    const response = await deleteNote(req.user!.id, noteId);
     res.status(200).json(response);
   })
 );
