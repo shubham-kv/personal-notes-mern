@@ -52,6 +52,7 @@ export function ViewNotes() {
 
   return (
     <ListProvider
+      emptyDataMessage='Nothing found!'
       data={notesWithKey}
       error={error}
       isLoading={isLoading}
