@@ -3,10 +3,7 @@ import { IUser } from '@shared/types/api/user';
 
 const userSchema = new Schema<IUser>(
   {
-    name: {
-      type: String,
-      required: true,
-    },
+    name: String,
     email: {
       type: String,
       required: true,

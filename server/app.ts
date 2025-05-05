@@ -6,11 +6,17 @@ import { createServer, ViteDevServer } from 'vite';
 import compression from 'compression';
 import sirv from 'sirv';
 import morgan from 'morgan';
-import { clerkMiddleware, requireAuth } from '@clerk/express'
+import { clerkMiddleware, requireAuth } from '@clerk/express';
+
+import { notesRouter } from './routes';
+import {
+  authenticate,
+  clerkAuthStrategy,
+  httpErrorHandler,
+  zodErrorHandler,
+} from './middlewares';
 
 import { logger } from './logger';
-import { notesRouter } from './routes';
-import { httpErrorHandler, zodErrorHandler } from './middlewares';
 import { apiPrefix } from '@shared/constants';
 
 const isProdEnv = process.env.NODE_ENV === 'production';
@@ -48,7 +54,7 @@ export async function createApp(): Promise<express.Express> {
 
   // Server side auth middlewares for client pages
   app.get('/', (_, res) => res.redirect('/n'));
-  app.use('/n', requireAuth({ signInUrl }));
+  app.use('/n', requireAuth({ signInUrl }), authenticate(clerkAuthStrategy));
 
   // Serve HTML
   app.use(async (req, res) => {

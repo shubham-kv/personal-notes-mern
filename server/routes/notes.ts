@@ -10,6 +10,8 @@ import {
 } from '@server/services/notes';
 
 import {
+  authenticate,
+  clerkAuthStrategy,
   middlewareWrapper,
   mongoIdParamValidator,
   zodSchemaValidator,
@@ -30,7 +32,7 @@ import {
 const notesRouter = Router();
 const signInUrl = process.env.CLERK_SIGN_IN_URL;
 
-notesRouter.use(requireAuth({ signInUrl }));
+notesRouter.use(requireAuth({ signInUrl }), authenticate(clerkAuthStrategy));
 
 notesRouter.post(
   '/',
