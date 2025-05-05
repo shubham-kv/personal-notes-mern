@@ -1,4 +1,7 @@
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router';
 import { useClerk } from '@clerk/clerk-react';
+
 import { Button } from '@/components/ui/button';
 import { Skeleton } from './ui/skeleton';
 
@@ -17,30 +20,41 @@ function SignInSkeleton() {
 }
 
 export function SignIn() {
+  const navigate = useNavigate();
   const clerk = useClerk();
+
+  useEffect(() => {
+    if (clerk.loaded && clerk.isSignedIn) {
+      navigate('/n', { replace: true });
+    }
+  }, [clerk.loaded, clerk.isSignedIn]);
 
   if (!clerk.loaded) {
     return <SignInSkeleton />;
   }
 
-  return (
-    <div className='flex flex-col gap-4'>
-      <div>
-        <h3 className='my-2'>Sign In</h3>
-        <p className='my-2'>
-          Hello there, please sign in from here to access your well preserved
-          notes.
-        </p>
-      </div>
+  if (!clerk.isSignedIn) {
+    return (
+      <div className='flex flex-col gap-4'>
+        <div>
+          <h3 className='my-2'>Sign In</h3>
+          <p className='my-2'>
+            Hello there, please sign in from here to access your well preserved
+            notes.
+          </p>
+        </div>
 
-      <div>
-        <Button
-          onClick={() => clerk.openSignIn()}
-          className='hover:cursor-pointer'
-        >
-          Sign In
-        </Button>
+        <div>
+          <Button
+            onClick={() => clerk.openSignIn({})}
+            className='hover:cursor-pointer'
+          >
+            Sign In
+          </Button>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
+
+  return null;
 }
