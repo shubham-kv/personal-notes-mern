@@ -1,4 +1,4 @@
-import { beforeAll, beforeEach, describe, test } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, test, vi } from 'vitest';
 import supertest, { Response } from 'supertest';
 import TestAgent from 'supertest/lib/agent';
 
@@ -20,6 +20,8 @@ import {
 } from '../data';
 import { noteResourcePath, notesResourcePath } from '../constants';
 
+vi.mock('@clerk/express');
+
 describe('Notes API e2e', () => {
   const createNoteRequestLine = `POST ${notesResourcePath}`;
   const getNotesRequestLine = `GET ${notesResourcePath}`;
@@ -31,6 +33,10 @@ describe('Notes API e2e', () => {
   const seededNoteIds: string[] = [];
 
   runDBHooks(true);
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
 
   beforeAll(async () => {
     const app = await createApp();
